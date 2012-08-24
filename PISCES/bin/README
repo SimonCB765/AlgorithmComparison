@@ -1,1 +1,4 @@
-These files are the modified files necessary to run the aspects of PISCES needed for the algorithm comparison. These should be the only files needed. The executables are the NCBI BLAST (not BLAST+) files needed by PISCES to run on Windows systems.
+These files are the modified files necessary to run the aspects of PISCES needed for the algorithm comparison. These should be the only files needed.
+The files have been modified to separate the BLASTing and the culling, and also to enable them to run on Windows systems.
+The executables are the NCBI BLAST (not BLAST+) files needed by PISCES to run on Windows systems.
+Linux code for PISCES can be found here: http://dunbrack.fccc.edu/Guoli/pisces_download.php#BLASTDB

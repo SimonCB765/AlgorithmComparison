@@ -2,16 +2,24 @@ import igraph
 import subprocess
 import os
 
-def main(adjList, outputLoc, removed, nodeLabels = [], interactive = False):
-    """adjList is the adj matrix to use for the graph
-    outputLoc is the location for the image (.png or .pdf is best)
-    removed are the nodes that will no longer be in the graph (list of integers with integer 0 being the top row of the adjList)
+def main(adjList, outputLoc, removed, nodeLabels=[], interactive=False):
+    """Generate an image of the protein similarity graph that displays the non-redundant and removed proteins.
 
-    Set interactive to True if you want to use R to fine tune the graph coordinates
-    if nodeLabels is [] then there will be no labels on the nodes, if you want labels pass a list with the same number of elements as the number of nodes
-        needs to be a list of strings
+    In the final graph the white nodes are the ones removed while the black ones are the ones remaining
 
-    In the final graph the white nodes are the ones removed while the black ones are the ones remaining"""
+    @param adjList: The adjacency matrix used to represent the graph
+    @type adjList : dictionary
+    @param outputLoc: The location where the image of the graph should be saved.
+    @type outputLoc : string
+    @param removed: The nodes that are no longer in the graph. The ids of the nodes run from 0 to n.
+    @type removed : List of integers identifying the removed nodes.
+    @param nodeLabels: The labels for the nodes in the graph.
+    @type nodeLabels : A list of strings. If the list is empty then no labels are used. If the list is not empty but the length is less than the number of nodes in the graph, then default labels are used.
+    @param interactive: Whether the user wants to manually layout the nodes of the graph.
+    @type interactive : boolean
+
+    """
+
 
     # Define useful variables
     numberNodes = len(adjList)

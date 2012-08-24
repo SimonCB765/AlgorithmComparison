@@ -46,6 +46,22 @@ def pruneByNeighbours(adjList, IDs, timeAllowed, startTime):
 
 
 def main(adj, names, timeAllowed):
+    """Use the BlastCuller heuristic method to calculate an approximation to the maximum independent set.
+
+    Returns a list of the proteins to keep and a list of the proteins to cull. The list of proteins to keep only contains the
+    names of the proteins in the protein similarity graph that should be kept. If there are any proteins that were not
+    included in adj (for example proteins with no neighbours), then these will NOT be included in the list of proteins to keep.
+    See the README for a more in depth description of this.
+    
+    @param adj: A sparsematrix representation of the protein similarity graph
+    @type adj : sparsematrix
+    @param names: A list of the names of the proteins in adj. Ordered such that the name of the protein represented by node i
+                  in adj is located at names[i].
+    @type names : list
+    @param timeAllowed: The maximum number of seconds the algorithm is allowed to run for.
+    @type timeAllowed : float
+
+    """
 
     # Determine the connected components of adj
     subgraphs = adj.connectedcomponents()

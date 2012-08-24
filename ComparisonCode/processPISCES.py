@@ -5,11 +5,14 @@ Created on 28 Mar 2011
 '''
 
 def main(cullLoc):
-    """Processes the PISCES removal file.
+    """Determine the proteins removed by PISCES.
 
-    records and returns in a list format the proteins that PISCES has culled
+    @param cullLoc: The location of the file containing the removed proteins.
+    @type cullLoc : string
+    return @type: list
+    return @use : The proteins that PISCES removed to make the non-redundant dataset.
 
-    cullLoc should be the location of the removal file."""
+    """
 
     PISCES = open(cullLoc, 'r')
 

@@ -32,6 +32,18 @@ def processdir(alignments, UCLUSTDir, percentage):
     return numErrors, proteinLengths
 
 def main(alignmentFile, UCLUSTDir, outFile):
+    """Determines the level of known redundancy that UCLUST failed to remove.
+
+    @param alignmentFile:
+    @type alignmentFile :
+    @param UCLUSTDir:
+    @type UCLUSTDir :
+    @param outFile:
+    @type outFile : strin
+    return @type:
+    return @use :
+
+    """
 
     percentages = [10, 20, 30, 40, 50, 60, 70, 80, 90]
 

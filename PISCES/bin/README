@@ -1,0 +1,1 @@
+These files are the modified files necessary to run the aspects of PISCES needed for the algorithm comparison. These should be the only files needed. The executables are the NCBI BLAST (not BLAST+) files needed by PISCES to run on Windows systems.

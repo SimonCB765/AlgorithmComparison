@@ -1,7 +1,14 @@
 import sparsematrix
 
 def main(DIMACSFile):
-    """Take a file in DIMACS format and turn it into a sparse matrix format."""
+    """Take a file in DIMACS format and turn it into a sparse matrix format.
+
+    @param DIMACSFile: The location of a file in DIMACS format.
+    @type DIMACSFile : string
+    return @type: sparsematrix
+    return @use : The sparsematrix representation of the DIMACS format graph.
+
+    """
 
     toNodes = []
     fromNodes = []

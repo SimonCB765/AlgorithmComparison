@@ -5,7 +5,6 @@ Created on 28 Mar 2011
 '''
 
 import time
-import subprocess
 
 def pruneGraph(adjList, IDs):
     """The method by which the Leaf algorithm determines which nodes to remove from the graph.
@@ -131,10 +130,19 @@ def pruneGraph(adjList, IDs):
         neighbours[0] |= set([toRemove])
 
 def main(adj, names):
-    """Use my heuristic method to calculate the maximum independent set.
+    """Use the Leaf heuristic method to calculate an approximation to the maximum independent set.
+    
+    Returns a list of the proteins to keep and a list of the proteins to cull. The list of proteins to keep only contains the
+    names of the proteins in the protein similarity graph that should be kept. If there are any proteins that were not
+    included in adj (for example proteins with no neighbours), then these will NOT be included in the list of proteins to keep.
+    See the README for a more in depth description of this.
+    
+    @param adj: A sparsematrix representation of the protein similarity graph
+    @type adj : sparsematrix
+    @param names: A list of the names of the proteins in adj. Ordered such that the name of the protein represented by node i
+                  in adj is located at names[i].
+    @type names : list
 
-    adj is the adjacency list for the graph
-    names is a list of the names of each row in the matrix with names[0] corresponding to adjacent[0]
     """
 
     startTime = time.clock()
@@ -145,41 +153,3 @@ def main(adj, names):
     endTime = time.clock()
 
     return proteinsToCull, proteinsToKeep, rem, [x for x in range(len(names)) if x not in rem], endTime-startTime
-
-
-
-
-
-
-
-##    # Determine the connected components of adj
-##    subgraphs = adj.connectedcomponents()
-##
-##    # Create an adjacency list for each of the connected components, and record it along with the node ID for each
-##    # of the nodes in the component.
-##    subgraphMatrices = []
-##    for i in subgraphs:
-##        subSet = sorted(i)
-##        subMat = adj.takesquare(subSet)
-##        subMat = subMat.adjList()
-##        subgraphMatrices.append((subMat, subSet))
-##
-##    startTime = time.clock()
-##
-##    # Non parallel method of getting results
-##    removeNode = []
-##    nodesToKeep = []
-##    for i in subgraphMatrices:
-##        subSetNodes = i[1]
-##        rem = pruneGraph(i[0], range(len(subSetNodes)))
-##        extendRemove = [subSetNodes[x] for x in range(len(subSetNodes)) if x in rem]
-##        removeNode.extend(extendRemove)
-##        extendKeep = [subSetNodes[x] for x in range(len(subSetNodes)) if x not in rem]
-##        nodesToKeep.extend(extendKeep)
-##
-##    proteinsToCull = [names[x] for x in removeNode]
-##    proteinsToKeep = [names[x] for x in nodesToKeep]
-##
-##    endTime = time.clock()
-##
-##    return proteinsToCull, proteinsToKeep, removeNode, nodesToKeep, endTime-startTime

@@ -8,7 +8,7 @@ import random
 import time
 
 def rule2(adjList, K):
-    # Define q = 4 as used in the paper
+    # Define q = 4, as used in the paper.
     q = 4
     Sq = []
     for k in adjList.keys():
@@ -17,13 +17,13 @@ def rule2(adjList, K):
         if deltaI >= q:
             Sq.append(k)
     
-    # Select the node to use to perturb K
+    # Select the node to use to perturb K.
     if Sq == []:
         init = random.choice(adjList.keys())
     else:
         init = random.choice(Sq)
     
-    # Perturb K
+    # Perturb K.
     tempK = set(K).intersection(adjList[init])
     tempK = tempK.union([init])
     
@@ -40,6 +40,18 @@ def calcC(adjList, K, p):
     return nodesSatisfyingCriteria
 
 def GLP(adjList, timeAllowed, startTime):
+    """
+
+    @param adjList: The adjacency list of the current connected component being examined.
+    @type adjList : dictionary
+    @param timeAllowed: The number of seconds that the algorithm is allowed to run for.
+    @type timeAllowed : float
+    @param startTime: The time when the algorithm was started.
+    @type startTime : float
+    return @type: list
+    return @use : The nodes in the largest independent set found.
+
+    """
     
     KBest = []
     K = []
@@ -102,6 +114,8 @@ def main(adj, names, timeAllowed):
     @type names : list
     @param timeAllowed: The maximum number of seconds the algorithm is allowed to run for.
     @type timeAllowed : float
+    return @type: list, list, list, list, float
+    return @use : names of the proteins to cull, names of the proteins from the graph to keep, numerical IDs of the proteins to cull, numerical IDs of the protein from the graph to keep, time taken by the algorithm
 
     """
 
@@ -120,11 +134,9 @@ def main(adj, names, timeAllowed):
     complemenetSubgraphMatrices = []
     totalNodes = 0
     for i in subgraphMatrices:
+        # Calculate the complement of each of the adjacency lists as GLP works by finding cliques in the complement.
         oldSubsetNodes = i[1]
         numberOldNodes = len(oldSubsetNodes)
-        
-        # Calculate the complement of the adjacency list as GLP works by finding cliques. Also prevent self loops in the complement
-        # Record any nodes that are connected to all others as these will be isolated nodes in the complement
         indAdjList = i[0]        
         cliqueAdjList = {}
         isolated = []
@@ -133,11 +145,12 @@ def main(adj, names, timeAllowed):
             if len(indAdjList[k]) == numberOldNodes - 1:
                 isolated.append(k)
             else:
+                # Calculate the complement and prevent self loops in it.
                 cliqueAdjList[k] = [x for x in range(numberOldNodes) if x not in indAdjList[k]and x != k]
                 totalNodes += 1
                 subsetNodes.append(k)
-
         if subsetNodes == []:
+            # Record any nodes that are connected to all others as these will be isolated nodes in the complement.
             complemenetSubgraphMatrices.append((isolated[0],isolated))
         else:
             complemenetSubgraphMatrices.append((cliqueAdjList,subsetNodes))
@@ -145,22 +158,21 @@ def main(adj, names, timeAllowed):
 
     allStart = time.clock()
 
+    # Determine the IDs of the nodes to keep by running the BlastCuller algorithm, and from this determine the names of
+    # the proteins to keep and remove.
     removeNode = []
     nodesToKeep = []
     for i in complemenetSubgraphMatrices:
-
         if type(i[0]) == int:
             keep = [i[0]]
         else:
             startTime = time.clock()
             subgraphTime = timeAllowed * (len(i[0].keys()) / totalNodes)
             keep = GLP(i[0], subgraphTime, startTime)
-
         extendRemove = [i[1][x] for x in range(len(i[1])) if x not in keep]
         removeNode.extend(extendRemove)
         extendKeep = [i[1][x] for x in range(len(i[1])) if x in keep]
         nodesToKeep.extend(extendKeep)
-
     proteinsToCull = [names[x] for x in removeNode]
     proteinsToKeep = [names[x] for x in nodesToKeep]
 

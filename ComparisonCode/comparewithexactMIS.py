@@ -6,7 +6,7 @@ def compare_exact_and_others(exactResults, otherAlgorithmsResults, outputLocatio
     heading = 'Dataset\tExact Kept\tExact Time'
     for i in otherAlgsUsed:
         heading += ('\t' + i + ' Kept\t' + i + ' Kept Difference With Exact\t' + i + ' Time')
-    results = dict([(i, dict([(j, [heading]) for j in ['20','30','40','50','60','70','80','90']]))
+    results = dict([(i, dict([(j, [heading]) for j in ['20', '25', '30', '40', '50', '60', '70', '80', '90']]))
                     for i in ['100', '250', '500', '1000', '2000', '5000']])
     for cutoff in exactResults.keys():
         for dataset in sorted(exactResults[cutoff]):
@@ -43,12 +43,12 @@ def compare_exact_and_others(exactResults, otherAlgorithmsResults, outputLocatio
             writeResults.close()
 
 def process(folderWithMyResults):
-    resultsPISCES = dict([(i, {}) for i in ['10', '20','30','40','50','60','70','80','90']])
-    resultsLeaf = dict([(i, {}) for i in ['10', '20','30','40','50','60','70','80','90']])
-    resultsFIS = dict([(i, {}) for i in ['10', '20','30','40','50','60','70','80','90']])
-    resultsNeighbourCull = dict([(i, {}) for i in ['10', '20','30','40','50','60','70','80','90']])
-    resultsVSA = dict([(i, {}) for i in ['10', '20','30','40','50','60','70','80','90']])
-    resultsBlastCuller = dict([(i, {}) for i in ['10', '20','30','40','50','60','70','80','90']])
+    resultsPISCES = dict([(i, {}) for i in ['10', '20', '25', '30', '40', '50', '60', '70', '80', '90']])
+    resultsLeaf = dict([(i, {}) for i in ['10', '20', '25', '30', '40', '50', '60', '70', '80', '90']])
+    resultsFIS = dict([(i, {}) for i in ['10', '20', '35', '30', '40', '50', '60', '70', '80', '90']])
+    resultsNeighbourCull = dict([(i, {}) for i in ['10', '20', '25', '30', '40', '50', '60', '70', '80', '90']])
+    resultsVSA = dict([(i, {}) for i in ['10', '20', '25', '30', '40', '50', '60', '70', '80', '90']])
+    resultsBlastCuller = dict([(i, {}) for i in ['10', '20', '25', '30', '40', '50', '60', '70', '80', '90']])
     for i in ['Results100', 'Results250', 'Results500', 'Results1000', 'Results2000', 'Results5000']:
         datasetSize = int(i[7:])
         currentDir = folderWithMyResults + '\\' + i
@@ -101,7 +101,7 @@ def process(folderWithMyResults):
     return resultsPISCES, resultsLeaf, resultsFIS, resultsNeighbourCull, resultsVSA, resultsBlastCuller
 
 def processcsv(fileToCompare):
-    results = dict([(i, {}) for i in ['20','30','40','50','60','70','80','90']])
+    results = dict([(i, {}) for i in ['20', '25', '30', '40', '50', '60', '70', '80', '90']])
     readResults = open(fileToCompare, 'r')
     readResults.readline()
     for line in readResults:

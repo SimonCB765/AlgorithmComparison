@@ -17,7 +17,7 @@ import adjlistcreation
 
 # Import the culling methods.
 import CMBlastCuller
-import CMBSK
+import CMVSA
 import CMFIS
 import CMGLP
 import CMLeaf
@@ -110,6 +110,10 @@ def main(args):
             os.rename(PISCESPath + '\\log_pc' + percentage + '.log', currentDir + '\\' + percentage + 'PISCESCull.txt')
             # Process PISCES results to determine the number of proteins to remove and write out the time taken and number removed
             removedPISCES = processPISCES.main(currentDir + '\\' + percentage + 'PISCESCull.txt')
+            writePISCESRemoved = open(currentDir + '\\' + percentage + 'PISCESCull.txt', 'w')
+            for j in removedPISCES:
+                writePISCESRemoved.write(j + '\n')
+                writePISCESRemoved.close()
             os.rename(PISCESPath + '\\pdbaa.align', currentDir + '\\Aligned.txt')
             os.chdir(workingDirectory)
 
@@ -174,25 +178,24 @@ def main(args):
                         removedLeaf, proteinsToKeep, removeNode, nodesToKeep, timeTaken = CMLeaf.main(adjList, proteinNames)
                         LeafTimed = LeafTimed + timeTaken
                     LeafTimed /= float(timeitIterQuick)
-                    LeafOutput = open(currentDir + '\\' + percentage + 'LeafKept.txt', 'w')
-                    for j in proteinsToKeep:
+                    LeafOutput = open(currentDir + '\\' + percentage + 'LeafCull.txt', 'w')
+                    for j in removedLeaf:
                         LeafOutput.write(j + '\n')
                     LeafOutput.close()
                     resultsTabDelim.write('\t' + str(LeafTimed) + '\t' + str(len(removedLeaf)))
 
                     print '\t\tFinished algorithm Leaf. ', time.clock()
                     
-                    timeAllowed = max(PISCESTimed, LeafTimed*multipleOfLeafTime)
-#                    timeAllowed = min(timeAllowed, 9000)
+                    timeAllowed = max(120, LeafTimed*multipleOfLeafTime)
 
                 elif alg == 'FIS':
                     print '\t\tNow using algorithm FIS. ', time.clock()
                     removedFIS, proteinsToKeep, removeNode, nodesToKeep, FISTimed = CMFIS.main(adjList, proteinNames, timeAllowed)
-                    FISOutput = open(currentDir + '\\' + percentage + 'FISKept.txt', 'w')
-                    for j in proteinsToKeep:
+                    FISOutput = open(currentDir + '\\' + percentage + 'FISCull.txt', 'w')
+                    for j in removedFIS:
                         FISOutput.write(j + '\n')
                     FISOutput.close()
-                    resultsTabDelim.write('\t' + str(FISTimed) + '\t' + str(numOfNodes - len(nodesToKeep)))
+                    resultsTabDelim.write('\t' + str(FISTimed) + '\t' + str(len(removedFIS)))
 
                     print '\t\tFinished algorithm FIS. ', time.clock()
                     
@@ -202,25 +205,25 @@ def main(args):
                         resultsTabDelim.write('\t*\t*')
                     else:
                         removedNC, proteinsToKeep, removeNode, nodesToKeep, NCTimed, outOfTime = CMNeighbourCull.main(adjList, proteinNames, timeAllowed)
-                        NCOutput = open(currentDir + '\\' + percentage + 'NCKept.txt', 'w')
+                        NCOutput = open(currentDir + '\\' + percentage + 'NCCull.txt', 'w')
                         for j in removedNC:
                             NCOutput.write(j + '\n')
                         NCOutput.close()
                         if outOfTime:
                             resultsTabDelim.write('\t' + str(NCTimed) + '\t*')
                         else:
-                            resultsTabDelim.write('\t' + str(NCTimed) + '\t' + str(numOfNodes - len(nodesToKeep)))
+                            resultsTabDelim.write('\t' + str(NCTimed) + '\t' + str(len(removedNC))
 
                     print '\t\tFinished algorithm NeighbourCull. ', time.clock()
 
                 elif alg == 'VSA':
                     print '\t\tNow using algorithm VSA. ', time.clock()
-                    removedBSK, proteinsToKeep, removeNode, nodesToKeep, BSKTimed = CMBSK.main(adjList, proteinNames, timeAllowed)
-                    BSKOutput = open(currentDir + '\\' + percentage + 'BSKKept.txt', 'w')
-                    for j in removedBSK:
-                        BSKOutput.write(j + '\n')
-                    BSKOutput.close()
-                    resultsTabDelim.write('\t' + str(BSKTimed) + '\t' + str(numOfNodes - len(nodesToKeep)))
+                    removedVSA, proteinsToKeep, removeNode, nodesToKeep, VSATimed = CMVSA.main(adjList, proteinNames, timeAllowed)
+                    VSAOutput = open(currentDir + '\\' + percentage + 'VSACull.txt', 'w')
+                    for j in removedVSA:
+                        VSAOutput.write(j + '\n')
+                    VSAOutput.close()
+                    resultsTabDelim.write('\t' + str(VSATimed) + '\t' + str(len(removedVSA))
 
                     print '\t\tFinished algorithm VSA. ', time.clock()
 
@@ -231,18 +234,18 @@ def main(args):
                     for j in removedBlastCuller:
                         BlastCullerOutput.write(j + '\n')
                     BlastCullerOutput.close()
-                    resultsTabDelim.write('\t' + str(BlastCullerTimed) + '\t' + str(numOfNodes - len(nodesToKeep)))
+                    resultsTabDelim.write('\t' + str(BlastCullerTimed) + '\t' + str(len(removedBlastCuller))
 
                     print '\t\tFinished algorithm BlastCuller. ', time.clock()
                     
                 elif alg == 'GLP':
                     print '\t\tNow using algorithm GLP. ', time.clock()
                     removedGLP, proteinsToKeep, removeNode, nodesToKeep, GLPTimed = CMGLP.main(adjList, proteinNames, timeAllowed)
-                    GLPOutput = open(currentDir + '\\' + percentage + 'GLPKept.txt', 'w')
+                    GLPOutput = open(currentDir + '\\' + percentage + 'GLPCull.txt', 'w')
                     for j in removedGLP:
                         GLPOutput.write(j + '\n')
                     GLPOutput.close()
-                    resultsTabDelim.write('\t' + str(GLPTimed) + '\t' + str(numOfNodes - len(nodesToKeep)))
+                    resultsTabDelim.write('\t' + str(GLPTimed) + '\t' + str(len(removedGLP))
 
                     print '\t\tFinished algorithm GLP. ', time.clock()
 

@@ -17,16 +17,28 @@ import time
 #
 
 def BSK(adjList, timeAllowed, startTime):
+    """
+
+    @param adjList: The adjacency list of the current connected component being examined.
+    @type adjList : dictionary
+    @param timeAllowed: The number of seconds that the algorithm is allowed to run for.
+    @type timeAllowed : float
+    @param startTime: The time when the algorithm was started.
+    @type startTime : float
+    return @type: list, boolean
+    return @use : The nodes that compose the minimum vertex cover, whether the time limit was exceeded.
+
+    """
 
     MVC = []
     notfinished = True
 
     while notfinished:
 
-        # Calculate degree of all node
+        # Calculate degree of every node.
         degree = dict([(i, len(adjList[i])) for i in adjList.keys()])
 
-        # Calculate the support of all nodes and the largest support of all nodes
+        # Calculate the support of all nodes, and the largest support of all nodes.
         support = {}
         largestSupport = 0
         for i in adjList.keys():
@@ -37,18 +49,19 @@ def BSK(adjList, timeAllowed, startTime):
                 largestSupport = supportSize
             support[i] = supportSize
 
-        # Find all nodes with largest support
+        # Find all nodes with the largest support.
         nodesWithMaxSupport = []
         for i in support.keys():
             if support[i] == largestSupport:
                 nodesWithMaxSupport.append(i)
 
-        # If only one node has max support then add it to the vertex cover
+        # Determine which node to add to teh vertex cover.
         if len(nodesWithMaxSupport) == 1:
+            # If only one node has the largest support, then add it to the vertex cover.
             removedNode = nodesWithMaxSupport[0]
             MVC.append(nodesWithMaxSupport[0])
         else:
-            # Find the node with max degree
+            # If multiple nodes have the largest vertex cover, then find the node with the maximum degree.
             maxDegree = 0
             nodeWithMaxDeg = []
             for i in nodesWithMaxSupport:
@@ -56,20 +69,21 @@ def BSK(adjList, timeAllowed, startTime):
                 if nodeDeg > maxDegree:
                     maxDegree = nodeDeg
                     nodeWithMaxDeg = i
-            # Remove nodeWithMaxDeg
+            # Add the node wiht the maximum degree to the vertex cover.
             removedNode = nodeWithMaxDeg
             MVC.append(nodeWithMaxDeg)
 
-        # Remvoe all links to removedNode
+        # Remvoe all edges between removedNode and other nodes.
         removedNodeNeighbours = adjList[removedNode]
         for i in removedNodeNeighbours:
             adjList[i].remove(removedNode)
             adjList[removedNode] = []
 
-        # Check if there are any nodes with neighbours
+        # Check if there are any nodes with neighbours.
         notfinished = False
         for i in adjList.keys():
             if adjList[i] != []:
+                # If there are still nodes with neighbours, then continue searching for the minimum vertex cover.
                 notfinished = True
                 break
 
@@ -94,10 +108,12 @@ def main(adj, names, timeAllowed):
     @type names : list
     @param timeAllowed: The maximum number of seconds the algorithm is allowed to run for.
     @type timeAllowed : float
+    return @type: list, list, list, list, float
+    return @use : names of the proteins to cull, names of the proteins from the graph to keep, numerical IDs of the proteins to cull, numerical IDs of the protein from the graph to keep, time taken by the algorithm
 
     """
     
-    # Determine the connected components of adj
+    # Determine the connected components of the graph.
     subgraphs = adj.connectedcomponents()
 
     # Create an adjacency list for each of the connected components, and record it along with the node ID for each
@@ -111,8 +127,8 @@ def main(adj, names, timeAllowed):
 
     startTime = time.clock()
 
-    # Determine the IDs of the nodes to keep by running the fish algorithm, and from this determine the names of
-    # the nodes to keep and remove.
+    # Determine the IDs of the nodes to keep by running the VSA algorithm, and from this determine the names of
+    # the proteins to keep and remove.
     removeNode = []
     nodesToKeep = []
     for i in subgraphMatrices:
@@ -122,7 +138,6 @@ def main(adj, names, timeAllowed):
         removeNode.extend(extendRemove)
         extendKeep = [subSetNodes[x] for x in range(len(subSetNodes)) if x not in remove]
         nodesToKeep.extend(extendKeep)
-
     proteinsToCull = [names[x] for x in removeNode]
     proteinsToKeep = [names[x] for x in nodesToKeep]
 

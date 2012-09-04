@@ -11,6 +11,18 @@ import time
 # Pengfei Liu  Zhenbing Zeng  Ziliang Qian  Kaiyan Feng  Yudong Cai
 
 def BlastCuller(adjList, timeAllowed, startTime):
+    """
+
+    @param adjList: The adjacency list of the current connected component being examined.
+    @type adjList : dictionary
+    @param timeAllowed: The number of seconds that the algorithm is allowed to run for.
+    @type timeAllowed : float
+    @param startTime: The time when the algorithm was started.
+    @type startTime : float
+    return @type: list, boolean
+    return @use : The nodes that need removing from the graph in order to remove all edges, whether the time limit was exceeded.
+
+    """
 
     remove = []
     notfinished = True
@@ -18,12 +30,13 @@ def BlastCuller(adjList, timeAllowed, startTime):
     while notfinished:
 
         if time.clock() - startTime > timeAllowed:
+            # If the amount of time allowed has been exceeded, then return the current results.
             return remove, True
 
-        # Calculate degree of all node
+        # Calculate degree of every node.
         degree = dict([(i, len(adjList[i])) for i in adjList.keys()])
 
-        # Find node with largest degree
+        # Find node with largest degree.
         nodeWithMaxDeg = None
         maxDeg = 0
         for i in degree.keys():
@@ -31,18 +44,20 @@ def BlastCuller(adjList, timeAllowed, startTime):
                 nodeWithMaxDeg = i
                 maxDeg = degree[i]
 
+        # Remove the node with the greatest degree.
         remove.append(nodeWithMaxDeg)
 
-        # Remvoe all links to nodeWithMaxDeg
+        # Remvoe all edges between nodeWithMaxDeg and other nodes.
         removedNodeNeighbours = adjList[nodeWithMaxDeg]
         for i in removedNodeNeighbours:
             adjList[i].remove(nodeWithMaxDeg)
             adjList[nodeWithMaxDeg] = []
 
-        # Check if there are any nodes with neighbours
+        # Check if there are any nodes with neighbours.
         notfinished = False
         for i in adjList.keys():
             if adjList[i] != []:
+                # If there are still nodes with neighbours, then continue searching for the MIS.
                 notfinished = True
                 break
 
@@ -64,10 +79,12 @@ def main(adj, names, timeAllowed):
     @type names : list
     @param timeAllowed: The maximum number of seconds the algorithm is allowed to run for.
     @type timeAllowed : float
+    return @type: list, list, list, list, float
+    return @use : names of the proteins to cull, names of the proteins from the graph to keep, numerical IDs of the proteins to cull, numerical IDs of the protein from the graph to keep, time taken by the algorithm
 
     """
     
-    # Determine the connected components of adj
+    # Determine the connected components of the graph.
     subgraphs = adj.connectedcomponents()
 
     # Create an adjacency list for each of the connected components, and record it along with the node ID for each
@@ -81,8 +98,8 @@ def main(adj, names, timeAllowed):
 
     startTime = time.clock()
 
-    # Determine the IDs of the nodes to keep by running the fish algorithm, and from this determine the names of
-    # the nodes to keep and remove.
+    # Determine the IDs of the nodes to keep by running the BlastCuller algorithm, and from this determine the names of
+    # the proteins to keep and remove.
     removeNode = []
     nodesToKeep = []
     for i in subgraphMatrices:
@@ -94,7 +111,6 @@ def main(adj, names, timeAllowed):
         nodesToKeep.extend(extendKeep)
         if outOfTime:
             break
-
     proteinsToCull = [names[x] for x in removeNode]
     proteinsToKeep = [names[x] for x in nodesToKeep]
 

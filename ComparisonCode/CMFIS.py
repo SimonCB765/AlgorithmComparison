@@ -18,6 +18,12 @@ def add_nodes(adjList, start, timeAllowed, startTime):
     @type adjList: dictionary of lists
     @param start: The initial set of nodes which is to be augmented by adding nodes to it.
     @type start: list
+    @param timeAllowed: The number of seconds that the algorithm is allowed to run for.
+    @type timeAllowed : float
+    @param startTime: The time when the algorithm was started.
+    @type startTime : float
+    return @type: list, boolean
+    return @use : The nodes form the maximal independent set found, whether the time limit was exceeded.
     
     """
 
@@ -31,23 +37,23 @@ def add_nodes(adjList, start, timeAllowed, startTime):
 
     while True:
         
-        # Update the record of the nodes which are not adjacent to the nodes in adjNodes
+        # Update the record of the nodes which are not adjacent to the nodes in adjNodes.
         nonAdjNodes.difference_update(adjNodes)
         
-        # If nonAdjNodes is == [] then a maximal independent set has been found as no new nodes can be added to adjNodes
+        # If nonAdjNodes is == [], then a maximal independent set has been found as no new nodes can be added to adjNodes
         if not nonAdjNodes:
             break
 
-        # Find the node which if added to adjNodes will cause adjNodes to gain the fewest nodes
-        numAdded = 1000000
+        # Find the node which if added to adjNodes will cause adjNodes to gain the fewest nodes.
+        numAdded = 1000000  # Arbitrarily large number to start with.
         nodeToAdd = None
         newAdjNodes = None
         # Loop through the non-adjacent nodes and determine the number of nodes that each node in nonAdjNodes will cause
-        # to be added to adjNodes
+        # to be added to adjNodes.
         for i in nonAdjNodes:
             intersect = set(adjList[i]).intersection(nonAdjNodes)
             interLength = len(intersect)
-            # If a new minimum has been found mark the node i as the new best node to add to adjNodes
+            # If a new minimum has been found mark the node i as the new best node to add to adjNodes.
             if interLength < numAdded:
                 if interLength == 1:
                     nodeToAdd = i
@@ -56,9 +62,9 @@ def add_nodes(adjList, start, timeAllowed, startTime):
                 numAdded = interLength
                 nodeToAdd = i
                 newAdjNodes = intersect
-        # Add the node found to the recorded independent set
+        # Add the node found to the recorded independent set.
         newStart.append(nodeToAdd)
-        # Add the new nodes that this node will cause to become adjacent to the independent set to adjNodes
+        # Add to adjNodes all the new nodes that this node will cause to become adjacent to the independent set.
         adjNodes.update(newAdjNodes)
 
         if time.clock() - startTime > timeAllowed:
@@ -80,23 +86,29 @@ def swap_nodes(adjList, start, maxSetSize, timeAllowed, startTime):
     @type start: list
     @param maxSetSize: The size of the largest maximal independent set found so far
     @type maxSetSize: integer
+    @param timeAllowed: The number of seconds that the algorithm is allowed to run for.
+    @type timeAllowed : float
+    @param startTime: The time when the algorithm was started.
+    @type startTime : float
+    return @type: list, integer, boolean
+    return @use : The nodes form the maximal independent set found, the size of the maximal independent set found, whether the time limit was exceeded.
     
     """
 
     newStart = list(start)
     maxSet = start
-    # If there is no change in the maximum size of the independent set found over one loop of all nodes then exit
+    # If there is no change in the maximum size of the independent set found over one loop of all nodes then exit.
     changed = False
 
     while changed:
         changed = False
 
-        # For each node in the adjacency list
+        # For each node in the adjacency list:
         for key in adjList:
-            # Determine how many nodes it is adjacenct to that are in the maximal independent set 
+            # Determine how many nodes it is adjacenct to that are in the maximal independent set.
             inter = list(set(adjList[key]).intersection(newStart))
-            # If it is only adjacent to one then swap it with that one
             if len(inter) == 1:
+                # If it is only adjacent to one then swap it with that one.
                 temp = list(newStart)
                 temp.remove(inter[0])
                 temp.append(key)
@@ -121,6 +133,12 @@ def fish(adj, timeAllowed, startTime):
     
     @param adj: An adjacency list which represents the graph in which the maximal independent set is to be found.
     @type adj: dictionary of lists
+    @param timeAllowed: The number of seconds that the algorithm is allowed to run for.
+    @type timeAllowed : float
+    @param startTime: The time when the algorithm was started.
+    @type startTime : float
+    return @type: list, boolean
+    return @use : The nodes form the maximal independent set found, whether the time limit was exceeded.
     
     """
 
@@ -177,10 +195,12 @@ def main(adj, names, timeAllowed):
     @type names : list
     @param timeAllowed: The maximum number of seconds the algorithm is allowed to run for.
     @type timeAllowed : float
+    return @type: list, list, list, list, float
+    return @use : names of the proteins to cull, names of the proteins from the graph to keep, numerical IDs of the proteins to cull, numerical IDs of the protein from the graph to keep, time taken by the algorithm
 
     """
     
-    # Determine the connected components of adj
+    # Determine the connected components of the graph.
     subgraphs = adj.connectedcomponents()
 
     # Create an adjacency list for each of the connected components, and record it along with the node ID for each
@@ -195,7 +215,7 @@ def main(adj, names, timeAllowed):
     startTime = time.clock()
 
     # Determine the IDs of the nodes to keep by running the fish algorithm, and from this determine the names of
-    # the nodes to keep and remove.
+    # the proteins to keep and remove.
     removeNode = []
     nodesToKeep = []
     for i in subgraphMatrices:
@@ -207,7 +227,6 @@ def main(adj, names, timeAllowed):
         nodesToKeep.extend(extendKeep)
         if outOfTime:
             break
-
     proteinsToCull = [names[x] for x in removeNode]
     proteinsToKeep = [names[x] for x in nodesToKeep]
 

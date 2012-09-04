@@ -13,6 +13,8 @@ def pruneGraph(adjList, IDs):
     @type adjList : dictionary
     @param IDs: A list of the numerical indices of the nodes in the graph.
     @type IDs : list
+    return @type: list
+    return @use : The proteins that are to be removed from the graph in order to remove all edges.
     
     """
     
@@ -142,6 +144,8 @@ def main(adj, names):
     @param names: A list of the names of the proteins in adj. Ordered such that the name of the protein represented by node i
                   in adj is located at names[i].
     @type names : list
+    return @type: list, list, list, list, float
+    return @use : names of the proteins to cull, names of the proteins from the graph to keep, numerical IDs of the proteins to cull, numerical IDs of the protein from the graph to keep, time taken by the algorithm
 
     """
 

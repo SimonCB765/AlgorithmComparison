@@ -23,17 +23,23 @@ import CMLeaf
 import CMNeighbourCull
 
 
-
-
 def main(args):
-    """
-    resultsDir is the directory containing the BHOSLIB benchmark descriptions
-    algorithmsToUse is a list of the algorithms to use in the comparison
-    timeitIter is the number of iterations for timing
+    """Tests the specified algorithms on the BHOSLIB benchmark suite.
+
+    @param args: The command line arguments for the script.
+    @type args : list
+
+    The three elements of args are:
+    args[0]: The path of the directory where the results will be written, and where the BHOSLIB graph files are.
+             For more information on the directory strucutre required, see the README.
+    args[1]: A list of the algorithms to include in the data generation, names separated by '-' (e.g. Leaf-GLP-VSA).
+    args[2]: The number of iterations of the Leaf algorithm to perform. More iterations is slower, but gives a more accurate estimate of hte time taken by the algorithm
+
     """
 
     resultsDir, algsToUse, timeitIterQuick = args
-    
+
+    # Process the algorithms the user has requested.
     acceptedAlgs = ['Leaf', 'FIS', 'NeighbourCull', 'GLP', 'VSA', 'BlastCuller']
     tempAlgs = algsToUse.split('-')
     for i in tempAlgs:
@@ -44,12 +50,14 @@ def main(args):
 
     timeitIterQuick = int(timeitIterQuick)
 
+    # Determine which graphs are to be run.
     toRun = os.listdir(resultsDir)
     for i in toRun:
         # Remove all the non-BHOSLIB graph files (i.e. the results files).
         if i[-4:] != '.mis':
             os.remove(resultsDir + '\\' + i)
     toRun = os.listdir(resultsDir)
+    # Generate the results file, and write out its header.
     resultsFile = resultsDir + '\\Results.txt'
     resultsTabDelim = open(resultsFile, 'w')
     algNames = ''.join([i + '\t\t\t' for i in algorithmsToUse])
@@ -57,7 +65,7 @@ def main(args):
     resultsTabDelim.write('Test Set\tMean Degree\tNumber of Nodes\t' + algNames + '\n')
     resultsTabDelim.write('\t\t\t' + headings + '\n')
     
-    # Run the algorithms on each test file
+    # Run the algorithms on each graph.
     for benchFile in toRun:
         MISNum = benchFile.split('-')
         MISNum = int(MISNum[0][3:])
@@ -68,7 +76,7 @@ def main(args):
             
         adjList = BHOSLIB.main(benchmark)
             
-        # Calculate the degree of all the nodes in the graph
+        # Calculate the degree of all the nodes in the graph.
         degree = {}
         meanDegree = 0
         tempAdjList = adjList.adjList()
@@ -82,7 +90,8 @@ def main(args):
         # If there are no nodes to remove then don't bother calculating the degree
         if len(tempAdjList.keys()) != 0:
             meanDegree /= float(len(tempAdjList.keys()))
-        
+
+        # Write out the mean degree of all the nodes, and data for a histogram of the degree information.
         resultsTabDelim.write(str(meanDegree) + '\t')
         degOut = open(resultsDir + '\\' + bench + '-Histogram.txt', 'w')
         degOut.write('Degree\tNumber of Occurences\n')
@@ -90,15 +99,16 @@ def main(args):
             degOut.write(str(i) + '\t' + str(degree[i]) + '\n')
         degOut.close()
 
+        # Write out the number of nodes in the graph.
         numOfNodes = len(tempAdjList.keys())
         resultsTabDelim.write(str(numOfNodes))
         proteinNames = range(1, numOfNodes + 1)
             
-        # For each algorithm determine what it is and run the appropriate code
-        multipleOfLeafTime = 10
+        # Run each algorithm the user specified.
+        multipleOfLeafTime = 10  # The multiple of the time that Leaf took that the other algorithms are allowed to take.
         for alg in algorithmsToUse:
-                
             if alg == 'Leaf':
+                # Perform the culling and timing using Leaf.
                 print '\t\tNow using algorithm Leaf. ', time.clock()
                 LeafTimed = 0.0
                 for i in range(timeitIterQuick):
@@ -116,6 +126,7 @@ def main(args):
                 timeAllowed = LeafTimed * multipleOfLeafTime
             
             elif alg == 'FIS':
+                # Perform the culling and timing using FIS.
                 print '\t\tNow using algorithm FIS. ', time.clock()
                 removedFIS, proteinsToKeep, removeNode, nodesToKeep, FISTimed = CMFIS.main(adjList, range(1, numOfNodes + 1), timeAllowed)
                 FISOutput = open(resultsDir + '\\' + bench + '-FIS.txt', 'w')
@@ -128,6 +139,7 @@ def main(args):
                 print '\t\tFinished algorithm FIS. ', time.clock()
                 
             elif alg == 'NeighbourCull':
+                # Perform the culling and timing using NeighbourCull.
                 print '\t\tNow using algorithm NeighbourCull. ', time.clock()
                 removedNC, proteinsToKeep, removeNode, nodesToKeep, NCTimed, outOfTime = CMNeighbourCull.main(adjList, range(1, numOfNodes + 1), timeAllowed)
                 NCOutput = open(resultsDir + '\\' + bench + '-NeighbourCull.txt', 'w')
@@ -143,6 +155,7 @@ def main(args):
                 print '\t\tFinished algorithm NeighbourCull. ', time.clock()
 
             elif alg == 'VSA':
+                # Perform the culling and timing using VSA.
                 print '\t\tNow using algorithm VSA. ', time.clock()
                 removedBSK, proteinsToKeep, removeNode, nodesToKeep, BSKTimed = CMBSK.main(adjList, range(1, numOfNodes + 1), timeAllowed)
                 BSKOutput = open(resultsDir + '\\' + bench + '-VSA.txt', 'w')
@@ -155,6 +168,7 @@ def main(args):
                 print '\t\tFinished algorithm VSA. ', time.clock()
 
             elif alg == 'BlastCuller':
+                # Perform the culling and timing using BlastCuller.
                 print '\t\tNow using algorithm BlastCuller. ', time.clock()
                 removedBlastCuller, proteinsToKeep, removeNode, nodesToKeep, BlastCullerTimed = CMBlastCuller.main(adjList, range(1, numOfNodes + 1), timeAllowed)
                 BlastCullerOutput = open(resultsDir + '\\' + bench + '-BlastCuller.txt', 'w')
@@ -167,6 +181,7 @@ def main(args):
                 print '\t\tFinished algorithm BlastCuller. ', time.clock()
                 
             elif alg == 'GLP':
+                # Perform the culling and timing using GLP.
                 print '\t\tNow using algorithm GLP. ', time.clock()
                 removedGLP, proteinsToKeep, removeNode, nodesToKeep, GLPTimed = CMGLP.main(adjList, range(1, numOfNodes + 1), timeAllowed)
                 GLPOutput = open(resultsDir + '\\' + bench + '-GLP.txt', 'w')

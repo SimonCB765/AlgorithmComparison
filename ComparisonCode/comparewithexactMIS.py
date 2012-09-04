@@ -101,6 +101,15 @@ def process(folderWithMyResults):
     return resultsPISCES, resultsLeaf, resultsFIS, resultsNeighbourCull, resultsVSA, resultsBlastCuller
 
 def processcsv(fileToCompare):
+    """Processes a CSV file that contains the results of culling datasets.
+
+    The format of the files is 
+
+    @param fileToCompare: The CSV file to process.
+    @type fileToCompare : string (file location)
+
+    """
+
     results = dict([(i, {}) for i in ['20', '25', '30', '40', '50', '60', '70', '80', '90']])
     readResults = open(fileToCompare, 'r')
     readResults.readline()

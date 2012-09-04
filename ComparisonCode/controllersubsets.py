@@ -26,20 +26,22 @@ import CMUSearch
 
 
 def main(args):
-    """
-    resultsDir is the directory where the results are
-    algsToUse are the algorithms to use (names split by '-')
-    timeitIterQuick is the number of times to run the Leaf algorithm
-    """
+    """Tests the specified algorithms on a set of protein datasets.
 
-    #####
-    ## This assumes that all the BLASTing is done and the Aligned files from the BLASTing are in the resultsDir in their respective folders
-    ## e.g. a crash has occured after all the BLASTing but the results are not generated yet so you need the results from the BLAST results
-    ## Each folder must be cleared out of every file except aligned and the fasta file of sequences
-    #####
+    @param args: The command line arguments for the script.
+    @type args : list
+
+    The three elements of args are:
+    args[0]: The path of the directory where the results will be written, and where the FASTA and alignment files for the datasets can be found. For
+             more information on the required structure of the directory see the README.
+    args[1]: A list of the algorithms to include in the data generation, names separated by '-' (e.g. Leaf-GLP-VSA).
+    args[2]: The number of iterations of the Leaf algorithm to perform. More iterations is slower, but gives a more accurate estimate of hte time taken by the algorithm
+
+    """
 
     resultsDir, algsToUse, timeitIterQuick = args
-    
+
+    # Process the algorithms the user has requested.
     acceptedAlgs = ['Leaf', 'FIS', 'NeighbourCull', 'GLP', 'VSA', 'BlastCuller', 'UCLUST']
     tempAlgs = algsToUse.split('-')
     for i in tempAlgs:
@@ -51,21 +53,21 @@ def main(args):
 
     timeitIterQuick = int(timeitIterQuick)
 
-    # Determine if the results directory is in fact a directory
+    # Determine if the results directory is in fact a directory.
     if not os.path.isdir(resultsDir):
         print 'The results directory is not a directory.'
         sys.exit()
     
-    # Get the location of the PISCES bin directory
+    # Get the location of the PISCES bin directory.
     currentFilePath = os.path.abspath( __file__ )
     PISCESPath = currentFilePath[::-1].split('\\',3)[-1][::-1] + '\\PISCES\\bin'
     if 'UCLUST' in algorithmsToUse:
         USearchLoc = currentFilePath[::-1].split('\\',3)[-1][::-1]
         USearch = USearchLoc + '\\usearch4.1.93_win32.exe'
-        
+
     workingDirectory = os.getcwd()
 
-    # Initialise the folders by removing everything except the Aligned file and the fasta file of sequences. Also set up the
+    # Initialise the directories by removing everything except the Aligned file and the FASTA file of sequences. Also set up the
     # dictionary with the locations for saving the results for each percentage.
     resultsFiles = dict([(i, resultsDir + '/' + i + 'PercentResults.txt') for i in ['10', '20', '25', '30', '40', '50', '60', '70', '80', '90']])
     dataDirs = os.listdir(resultsDir)
@@ -82,6 +84,7 @@ def main(args):
             os.remove(resultsDir + '/' + i)
     dataDirs = os.listdir(resultsDir)
 
+    # Write out the headings for the results files.
     for i in resultsFiles.keys():
         resultsFile = resultsFiles[i]
         resultsTabDelim = open(resultsFile, 'w')
@@ -89,8 +92,9 @@ def main(args):
         headings = ''.join(['Time\tRemoved\t' for i in algorithmsToUse])
         resultsTabDelim.write('Test Set\tMean Degree\tNumber of Nodes\tNumber of Components\tLargest Component\tMean Component\tMean Degree of Largest Component\tPISCES\t\t' + algNames + '\n')
         resultsTabDelim.write('\t\t\t\t\t\t\tTime\tRemoved\t' + headings)
+        resultsTabDelim.close()
 
-    # Go through dataDirs again. This time running the algorithms.
+    # Go through the directories again, this time running the algorithms on each dataset.
     for i in sorted(dataDirs):
         currentDir = resultsDir + '\\' + i
         print 'Now working on dataset ', i, ':'
@@ -99,25 +103,27 @@ def main(args):
             resultsTabDelim = open(resultsFiles[percentage], 'a')
             resultsTabDelim.write('\n' + i + '\t')
 
-            print '\t\tNow timing PISCES'
-
+            # Generate the sparse matrix representation of the graph for the current dataset/cutoff combination.
             adjList, proteinNames = adjlistcreation.main(currentDir + '\\Aligned.txt', float(percentage))
-            os.chdir(PISCESPath)
-            os.rename(currentDir + '\\Aligned.txt', PISCESPath + '\\pdbaa.align')
+
+            print '\t\tNow timing PISCES'
+            os.chdir(PISCESPath)  # Change directory to enable running of PISCES.
+            os.rename(currentDir + '\\Aligned.txt', PISCESPath + '\\pdbaa.align')  # Rename the alignment file for use with PISCES.
             startPISCES = time.clock()
+            # Perform the culling using PISCES.
             subprocess.call('perl ' + PISCESPath + '\\Extract_Culled_SEQ.pl ' + percentage + ' 0 0 ' + currentDir + '\\' + i + '.fasta')
             PISCESTimed = time.clock() - startPISCES
             os.rename(PISCESPath + '\\log_pc' + percentage + '.log', currentDir + '\\' + percentage + 'PISCESCull.txt')
-            # Process PISCES results to determine the number of proteins to remove and write out the time taken and number removed
+            # Process PISCES results to determine the number of proteins to remove.
             removedPISCES = processPISCES.main(currentDir + '\\' + percentage + 'PISCESCull.txt')
             writePISCESRemoved = open(currentDir + '\\' + percentage + 'PISCESCull.txt', 'w')
             for j in removedPISCES:
                 writePISCESRemoved.write(j + '\n')
                 writePISCESRemoved.close()
             os.rename(PISCESPath + '\\pdbaa.align', currentDir + '\\Aligned.txt')
-            os.chdir(workingDirectory)
+            os.chdir(workingDirectory)  # Switch back to the initial working directoy to continue running the other algorithms.
 
-            # Calculate the degree of all the nodes in the graph
+            # Calculate the degree of all the nodes in the graph.
             degree = {}
             meanDegree = 0
             tempAdjList = adjList.adjList()
@@ -128,10 +134,11 @@ def main(args):
                 else:
                     degree[deg] = 1
                 meanDegree += deg
-            # If there are no nodes to remove then don't bother calculating the degree
+            # If there are no nodes to remove then don't bother calculating the degree.
             if len(tempAdjList.keys()) != 0:
                 meanDegree /= float(len(tempAdjList.keys()))
-            
+
+            # Write out the mean degree of all the nodes, and data for a histogram of the degree information.
             resultsTabDelim.write(str(meanDegree) + '\t')
             degOut = open(currentDir + '\\' + percentage + 'DegreeHistogram.txt', 'w')
             degOut.write('Degree\tNumber of Occurences\n')
@@ -139,10 +146,11 @@ def main(args):
                 degOut.write(str(d) + '\t' + str(degree[d]) + '\n')
             degOut.close()
 
+            # Write out the total number of nodes in the graph (not the number in the dataset, as some nodes in the dataset will be isolated).
             numOfNodes = len(tempAdjList.keys())
             resultsTabDelim.write(str(numOfNodes) + '\t')
 
-            # Calculate component size information
+            # Calculate component size information.
             numberComponents = 0
             largestComponent = 0
             meanComponent = 0
@@ -165,13 +173,14 @@ def main(args):
             resultsTabDelim.write(str(meanComponent) + '\t')
             resultsTabDelim.write(str(largestCompDeg) + '\t')
 
-            # Write out the PISCES results
+            # Write out the PISCES results.
             resultsTabDelim.write(str(PISCESTimed) + '\t' + str(len(removedPISCES)))
 
-            # For each algorithm determine what it is and run the appropriate code
-            multipleOfLeafTime = 10
+            # Run each algorithm the user specified.
+            multipleOfLeafTime = 10  # The multiple of the time that Leaf took that the other algorithms are allowed to take.
             for alg in algorithmsToUse:
                 if alg == 'Leaf':
+                    # Perform the culling and timing using Leaf.
                     print '\t\tNow using algorithm Leaf. ', time.clock()
                     LeafTimed = 0.0
                     for j in range(timeitIterQuick):
@@ -185,10 +194,12 @@ def main(args):
                     resultsTabDelim.write('\t' + str(LeafTimed) + '\t' + str(len(removedLeaf)))
 
                     print '\t\tFinished algorithm Leaf. ', time.clock()
-                    
+
+                    # Calculate the maximum amount of time allowed as the maximum of 10 times the time Leaf took, or 2 minutes.
                     timeAllowed = max(120, LeafTimed*multipleOfLeafTime)
 
                 elif alg == 'FIS':
+                    # Perform the culling and timing using FIS.
                     print '\t\tNow using algorithm FIS. ', time.clock()
                     removedFIS, proteinsToKeep, removeNode, nodesToKeep, FISTimed = CMFIS.main(adjList, proteinNames, timeAllowed)
                     FISOutput = open(currentDir + '\\' + percentage + 'FISCull.txt', 'w')
@@ -200,6 +211,7 @@ def main(args):
                     print '\t\tFinished algorithm FIS. ', time.clock()
                     
                 elif alg == 'NeighbourCull':
+                    # Perform the culling and timing using NeighbourCull.
                     print '\t\tNow using algorithm NeighbourCull. ', time.clock()
                     if False:#percentage == '10':
                         resultsTabDelim.write('\t*\t*')
@@ -217,6 +229,7 @@ def main(args):
                     print '\t\tFinished algorithm NeighbourCull. ', time.clock()
 
                 elif alg == 'VSA':
+                    # Perform the culling and timing using VSA.
                     print '\t\tNow using algorithm VSA. ', time.clock()
                     removedVSA, proteinsToKeep, removeNode, nodesToKeep, VSATimed = CMVSA.main(adjList, proteinNames, timeAllowed)
                     VSAOutput = open(currentDir + '\\' + percentage + 'VSACull.txt', 'w')
@@ -228,6 +241,7 @@ def main(args):
                     print '\t\tFinished algorithm VSA. ', time.clock()
 
                 elif alg == 'BlastCuller':
+                    # Perform the culling and timing using BlastCuller.
                     print '\t\tNow using algorithm BlastCuller. ', time.clock()
                     removedBlastCuller, proteinsToKeep, removeNode, nodesToKeep, BlastCullerTimed = CMBlastCuller.main(adjList, proteinNames, timeAllowed)
                     BlastCullerOutput = open(currentDir + '\\' + percentage + 'BlastCullerCull.txt', 'w')
@@ -239,6 +253,7 @@ def main(args):
                     print '\t\tFinished algorithm BlastCuller. ', time.clock()
                     
                 elif alg == 'GLP':
+                    # Perform the culling and timing using GLP.
                     print '\t\tNow using algorithm GLP. ', time.clock()
                     removedGLP, proteinsToKeep, removeNode, nodesToKeep, GLPTimed = CMGLP.main(adjList, proteinNames, timeAllowed)
                     GLPOutput = open(currentDir + '\\' + percentage + 'GLPCull.txt', 'w')
@@ -250,6 +265,7 @@ def main(args):
                     print '\t\tFinished algorithm GLP. ', time.clock()
 
                 elif alg == 'UCLUST':
+                    # Perform the culling and timing using UCLUST.
                     sortedFile = currentDir + '\\' + percentage + 'UCLUSTSorted.fasta'
                     clusterFile = currentDir + '\\' + percentage + 'UCLUSTClustered.fasta'
                     sortCommand = USearch + ' --sort ' + currentDir + '\\' + i + '.fasta' + ' --output ' + sortedFile
@@ -271,7 +287,7 @@ subprocess.call(clusterCommand)"""
             
             resultsTabDelim.close()
 
-            # Clean up the PISCES bin directory
+            # Clean up the PISCES bin directory.
             for filename in glob.glob(PISCESPath + '\\*.align'):
                 os.remove(filename)
             for filename in glob.glob(PISCESPath + '\\*.tmp'):

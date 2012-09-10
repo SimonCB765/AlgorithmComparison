@@ -11,6 +11,8 @@ import random
 def main(inFASTA, alignedFile, length, toGenerate, resultsDir, makeInput=False, entireAlign=False):
     """Creates a set of datasets of user specified sizes, along with the alignment files for the datasets.
 
+    Assumes that the FASTA file dataset has already been BLASTed, and the alignments determined.
+
     The size and number of the datasets generated is specified as follows:
     if length = [A, B, C] and toGenerate = [X, Y, Z]
     then X datasets of A sequences are produced, Y datasets of B sequences and Z datasets of C sequences
@@ -119,3 +121,14 @@ def main(inFASTA, alignedFile, length, toGenerate, resultsDir, makeInput=False, 
                 writeFasta.write('>' + protein + '\n' + listFasta[protein] + '\n')
             writeTo.close()
             writeFasta.close()
+
+if __name__ == '__main__':
+    if len(args) == 5:
+        main(sys.argv[1], sys.argv[2], sys.argv[3].split('-'), sys.argv[4].split('-'), sys.argv[5], False, False)
+    elif len(args) == 6:
+        main(sys.argv[1], sys.argv[2], sys.argv[3].split('-'), sys.argv[4].split('-'), sys.argv[5], sys.argv[6], False)
+    elif len(args) == 7:
+        main(sys.argv[1], sys.argv[2], sys.argv[3].split('-'), sys.argv[4].split('-'), sys.argv[5], sys.argv[6], sys.argv[7])
+    else:
+        print 'Incorrect number of arguments supplied. Only accepts 5, 6 or 7 arguments.'
+        sys.exit()

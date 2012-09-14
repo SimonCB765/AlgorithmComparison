@@ -17,10 +17,10 @@ def compare_exact_and_others(exactResults, otherAlgorithmsResults, outputLocatio
     if os.path.exists(outputLocation):
         # If it exists
         if os.path.isdir(outputLocation):
-            # and is a directory then remove it.
+            # and is a directory, then remove it.
             shutil.rmtree(outputLocation)
         else:
-            # and it is not a directory then raise an error
+            # and it is not a directory, then raise an error.
             print 'The output location provided exists and is not a directory.'
             return 
 

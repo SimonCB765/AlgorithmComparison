@@ -1,110 +1,268 @@
-PISCES code is said to be at path\to\PISCES\bin\
-Python code is said to be at path\to\python\code\
-
-containing information about the folder strucutre needed for each controller script
-	Biological
-	BHOSLIB
-	Exact MIS
-	GLP Leaf long run
-	PDB
-	Protein Length - generate a datasets of the lengths of all the proteins in the redudant and non-redundant datasets
-	UCLUST - percentage of 'non-redudant' proteins that have an edge that wasn't removed by UCLUST
+The following assumptions are made in these instructions:
+	PISCES code is located at path\to\PISCES\bin
+	Python code is located at path\to\python\code
 
 ###########################################################
 BHOSLIB
 ###########################################################
 Directory Structure Expected
 -----------------------------------------------------------
-The BHOSLIB directory structure just consists of putting all the BHOSLIB graph files in one directory, and not changing the names.
+The expected structure is a directory containing all the unzipped BHOSLIB graphs.
+An example of the expected structure is:
+	path\to\BHOSLIB
+		\frb30-15-1.mis
+		\frb30-15-2.mis
+		...
+		\frb100-40.mis
 
 Directory Structure Generated
 -----------------------------------------------------------
-After running the script the directory will contain the BHOSLIB graph files as before, but also all the results files. These are deleted on every invocation of the script.
+Assuming that Leaf and GLP are the only two algorithms used, an example of the expected structure is:
+	path\to\BHOSLIB
+		\frb30-15-1.mis
+		\frb30-15-1-GLP.txt
+		\frb30-15-1-Histogram.txt
+		\frb30-15-1-Leaf.txt
+		\frb30-15-2.mis
+		\frb30-15-2-GLP.txt
+		\frb30-15-2-Histogram.txt
+		\frb30-15-2-Leaf.txt
+		...
+		\frb100-40.mis
+		\frb100-40-GLP.txt
+		\frb100-40-Histogram.txt
+		\frb100-40-Leaf.txt
+		\Results.txt
+path\to\BHOSLIB\frbXXX-GLP.txt contains the nodes removed from graph frbXXX by GLP.
+path\to\BHOSLIB\frbXXX-Histogram.txt contains data on the degree of each node in graph frbXXX, and how often the different degrees occur.
+path\to\BHOSLIB\frbXXX-Leaf.txt contains the nodes removed from graph frbXXX by Leaf.
+path\to\BHOSLIB\Results.txt contains a table of the results of all algorithms run on all the BHOSLIB graphs.
 
 Workflow
 -----------------------------------------------------------
-
-process for generating BHOSLIB results
-	download BHOSLIB files
-	run algs on them
+1) Download the BHOSLIB graphs from http://www.nlsde.buaa.edu.cn/~kexu/benchmarks/graph-benchmarks.htm, and unzip them.
+2) Set up the directory strucutre as expected.
+3) Generate the BHOSLIB algorithm comparison results (ensure that the time limit is properly set within the code).
+	Assuming that the top level directory is called path\to\BHOSLIB, an example of the command used is as follows:
+		python path\to\python\code\controllerBHOSLIB.py path\to\BHOSLIB Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
 
 ###########################################################
 Biological Datasets
 ###########################################################
-Directory Structure Expected
+Directory Structure Expected (by step 4)
 -----------------------------------------------------------
+The same as the Protein Subset Datasets. The only difference is that there will be one dataset sub-directory. An example is as follows:
+	\path\to\results\directory
+		\BioDataset
+			\BioDataset.fasta
+			\Aligned.txt
+Note that the name of the dataset sub-directory (e.g. DatasetN) is the same as the name of the FASTA file of the dataset (e.g. DatasetN.fasta).
 
-Directory Structure Generated
+Directory Structure Generated (by step 4)
 -----------------------------------------------------------
+The same as the Protein Subset Datasets. The only difference is that there will be one dataset sub-directory. An example is as follows:
+	\path\to\results\directory
+		\BioDataset
+			\XDegreeHistogram.txt
+			\XLeafCull.txt
+			\XPISCESCull.txt
+			\YDegreeHistogram.txt
+			\YLeafCull.txt
+			\YPISCESCull.txt
+			\BioDataset.fasta
+			\Aligned.txt
+		\XPercentResults.txt
+		\YPercentResults.txt
+The ZPercentResults.txt files containn a table of the results of performing the culling with a Z% cut-off on the dataset.
 
 Workflow
 -----------------------------------------------------------
+Although this method was used for specific biological datasets (e.g. human proteome, mouse proteome etc.), it can be used for any collection of proteins.
+
+1) Aquire the FASTA format file of the biological dataset to use.
+2) BLAST the file and create the file of alignments using PISCES.
+	This uses the modified Cull_for_UserSEQ.pl PISCES file. Perform this step using the command:
+		perl path\to\PISCES\bin\Cull_for_UserSEQ.pl -i path\to\FASTA\file
+	As an example, assume that the FASTA file is called Human.fasta, and that the file is located at C:\Fasta\Human.fasta.
+	Then the path\to\FASTA\file used would be C:\Fasta\Human, the '.fasta' at the end is removed. For any FASTA file submitted you should remove the file extension, irrespective of the actual extension.
+3) Rename the pdbaa.align file created in the PISCES bin directory to Aligned.txt.
+	Move the Aligned.txt file and the C:\Fasta\Human.fasta file to the same directory. This directory must not be the PISCES bin directory.
+4) Run the algorithm comparison on the dataset (ensure that the time limit is properly set within the code).
+	An example of the command used for this is:
+		python path\to\python\code\controllersubsets.py path\to\results\directory Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
 
 ###########################################################
 Exact MIS
 ###########################################################
 Directory Structure Expected
 -----------------------------------------------------------
+The structure expected by the process is as follows:
+	path\to\Results
+		\Results100
+		\Results200
+		\Results500
+		\Results1000
+		\Results2000
+		\Results5000
+Each of the \Results sub-directories is generated by step 5 of the Protein Subset Datasets workflow (i.e. they are eqivalent to the \path\to\results\directory\subdir in the structure in that process).
+For example, \Results100 results from the command:
+	python path\to\python\code\controllersubsets.py path\to\Results\Results100 Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
 
 Directory Structure Generated
 -----------------------------------------------------------
+The results directory structure is separate from the input structure. The layout is as follows:
+	path\to\Results\ComparisonResults
+		\100
+			\100-20.txt
+			\100-30.txt
+			\100-40.txt
+			\100-50.txt
+			\100-60.txt
+			\100-70.txt
+			\100-80.txt
+			\100-90.txt
+		\200
+		\500
+		\1000
+		\2000
+		\5000
+The \200, \500, \1000, \2000 and \5000 sub-directories all contain files named in the same manner as the \100 sub-directory files (i.e. \200 contains 200-XX.txt files, \500 has 500-XX.txt etc.).
+Only files in the \100, \200, \500 and \1000 sub-directories contain actual results. This is because there were no exact results generated for datasets of 2000 and 5000 proteins.
 
 Workflow
 -----------------------------------------------------------
-process for generating exact results comparison
-	take Mark's results
-	take the results generated by the subset comparison
-	compare
+1) Generate the 6 expected directories.
+	This involves running the six commands:
+		python path\to\python\code\controllersubsets.py path\to\Results\Results100 Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
+		python path\to\python\code\controllersubsets.py path\to\Results\Results200 Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
+		python path\to\python\code\controllersubsets.py path\to\Results\Results500 Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
+		python path\to\python\code\controllersubsets.py path\to\Results\Results1000 Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
+		python path\to\python\code\controllersubsets.py path\to\Results\Results2000 Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
+		python path\to\python\code\controllersubsets.py path\to\Results\Results5000 Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
+	The process for this is outlined in the Protein Subset Datasets workflow.
+2) Get access to the exact (Cliquer) and GLP results in the expected CSV format, and put them in the locations expected by the exact commparison script.
+	The format of the CSV files is:
+		dataset name, % cutoff, # isolated nodes, size of MIS, time taken
+3) Run the exact comparison script.
+	The command for this is:
+		python path\to\python\code\comparewithexactMIS.py
 
 ###########################################################
 GLP Leaf Long Run Comparison
 ###########################################################
 Directory Structure Expected
 -----------------------------------------------------------
+Identical to the Protein Subset Datasets Directory Structure Expected section.
 
 Directory Structure Generated
 -----------------------------------------------------------
+Identical to the Protein Subset Datasets Directory Structure Generated section.
 
 Workflow
 -----------------------------------------------------------
+If the datasets have already been generated, then skip to step 5.
+If the Protein Subset Datasets workflow has already been carried out, then the datasets generated in that workflow can be used for this one.
+	However, the directory with the results of that workflow should be copied somewhere else to avoid overwriting the results of that workflow.
+
+1) Identical to the Protein Subset Datasets workflow step 1.
+2) Identical to the Protein Subset Datasets workflow step 2.
+3) Identical to the Protein Subset Datasets workflow step 3.
+4) Generate the subsets of the Human.fasta file.
+	The command used for this was:
+		python path\to\python\code\alignmentscreatefiles.py C:\Fasta\Human.fasta path\to\Aligned.txt 5000 50 path\to\results\directory
+	This will generate 50 subsets of Human.fasta, each of 5000 sequences, in the directory path\to\results\directory\Results5000.
+	Refer to the Directory Structure Expected section of the Protein Subset Datasets section for information on the directory structure this command generates.
+
+At this point the datasets have all been generated, and the comparisons between the algorithms can be run.
+
+5) Run the algorithm comparison on the datasets generated (ensure that the time limit is properly set within the code).
+	The command used for this was:
+		python path\to\python\code\controllersubsets.py path\to\results\directory\Results5000 Leaf-GLP 1
+	Other algorithms can be used, but unless they are timee bounded there is not much point.
 
 ###########################################################
 PDB
 ###########################################################
 Directory Structure Expected
 -----------------------------------------------------------
-TopLevel
- BLASTDB
- 
-BLASTDB contains the files with information about similarities, resolutions etc. downloaded from PISCES
- TopLevel contains both teh BLASTDB directory and the gzipped files of the list of non-redundant proteins downloaded from PISCES
+There are two directory structures expected. The first is the BLASTDB directory. This should take the form of:
+path\to\BLAST\directory
+	\MakeNonRedundant.log.pdb
+	\resolution.dat
+	\pdbaa
+	\pdbaa.align
+This directory can be set up simply by downloading and unzipping the BLASTDB.tar.gz directory from PISCES (http://dunbrack.fccc.edu/Guoli/pisces_download.php#BLASTDB).
+
+The seecond directory contains the gzipped files of the PISCES generated culled lists. The structure should be:
+path\to\culled\lists
+	\cullpdb_pc20_res1.6_R0.25_d120828_chains2068.gz
+	\cullpdb_pc20_res1.8_R0.25_d120828_chains3250.gz
+	...
+	\cullpdb_pc90_res100_R100_inclNOTXRAY_inclCA_d120828_chains28381.gz
 
 Directory Structure Generated
 -----------------------------------------------------------
+The BLASTDB directory structure is not changed by the comparison script.
+The directory of culled lists is only changed by the addition of a results file, as follows:
+path\to\culled\lists
+	\cullpdb_pc20_res1.6_R0.25_d120828_chains2068.gz
+	\cullpdb_pc20_res1.8_R0.25_d120828_chains3250.gz
+	...
+	\cullpdb_pc90_res100_R100_inclNOTXRAY_inclCA_d120828_chains28381.gz
+	\Results.txt
+
 
 Workflow
 -----------------------------------------------------------
-process for generating PDB results
-	download from PISCES
-	run Leaf on the PDB info downloaded and compare
+1) Download the pre-compiled culled lists from PISCES (http://dunbrack.fccc.edu/Guoli/pisces_download.php#culledpdb).
+2) Download the BLASTDB.tar.gz directory from PISCES (http://dunbrack.fccc.edu/Guoli/pisces_download.php#BLASTDB).
+3) Run the PISCES comparison.
+	The command used for this was:
+		python path\to\python\code\controllerPDB.py path\to\BLASTDB path\to\PreCompiled
+	path\to\BLASTDB is the location of the unzipped BLASTDB directory (from step 2).
+	path\to\PreCompiled is the location of the pre-compiled lists (from step 1).
 
 ###########################################################
 Protein Length
 ###########################################################
 Directory Structure Expected
 -----------------------------------------------------------
+The structure expected is the same as the directory structure generated by the Protein Subset Datasets or Biological workflow.
+As an example, a basic format for the strucutre expected is:
+	path\to\results\directory
+		\Dataset0
+		...
+		\DatasetN
+		\XPercentResults.txt
+		\YPercentResults.txt
+		\ZPercentResults.txt
 
 Directory Structure Generated
 -----------------------------------------------------------
+The structure is augmented by adding the protein length data.
+The new structure is:
+	path\to\results\directory
+		\Dataset0
+		...
+		\DatasetN
+		\XHistogramData.txt
+		\XPercentResults.txt
+		\YHistogramData.txt
+		\YPercentResults.txt
+		\ZHistogramData.txt
+		\ZPercentResults.txt
+The HistogramData.txt files will each contain a table of algorithms and the lengths of the proteins kept by them. There will also be a column for the redundant dataset.
+
 
 Workflow
 -----------------------------------------------------------
-to generate the histogram of lengths
-	OK, a histogram (scaled to %) for length distributions in redundant set and sets returned by PISCES and Leaf, just for human proteome sounds good.
-	read through the fasta file of all human sequences (in the resultsBiological)
-	record the lengths of each sequence
-	read through the files for each of the 10 cut offs, and record which proteins were kept by Leaf and by PISCES
-	record length distributions of each
+1) Go through the workflow for either the Protein Subset Datasets or the Biological Datasets.
+	The choice depends on whether the dataset you are generating length data for is a subset or an entire dataset.
+2) Generate the length data.
+	An example of the type of command used for this is:
+		python path\to\python\code\proteinlengthhistogramgenerator.py path\to\results\directory DatasetName Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST
+	DatasetName is the name of the sub-directory (dataset) in the path\to\results\directory directory. This is also the name of the FASTA format file for the dataset.
+	The list of the algorithms must only contain algorithms used in either the Protein Subset Datasets or the Biological Datasets algorithm comparison.
 
 ###########################################################
 Protein Subset Datasets
@@ -113,16 +271,17 @@ Directory Structure Expected (generated by step 4 and used by step 5)
 -----------------------------------------------------------
 For each call of controllersubsets.py, the expected strucutre of the input path\to\results\directory\subdir directory is as follows:
 	path\to\results\directory\subdir
-		Dataset0
-			Dataset0.fasta
-			Aligned.txt
-		Dataset1
-			Dataset1.fasta
-			Aligned.txt
+		\Dataset0
+			\Dataset0.fasta
+			\Aligned.txt
+		\Dataset1
+			\Dataset1.fasta
+			\Aligned.txt
 		...
-		DatasetN
-			DatasetN.fasta
-			Aligned.txt
+		\DatasetN
+			\DatasetN.fasta
+			\Aligned.txt
+Note that the name of the dataset sub-directory (e.g. DatasetN) is the same as the name of the FASTA file of the dataset (e.g. DatasetN.fasta).
 Each Aligned.txt is the alignment file for the proteins in the dataset named by the directory that contains it.
 For example, path\to\results\directory\subdir\Dataset0\Aligned.txt contains the alignments for the proteins in the dataset path\to\results\directory\subdir\Dataset0\Dataset0.fasta.
 There is one sub-directory under path\to\results\directory\subdir for every dataset that the algorithms will be compared on.
@@ -134,21 +293,21 @@ The only additions are the results files generated by each algorithm, and the ov
 In each path\to\results\directory\subdir\DatasetX directory, the results of culling using each algorithm at each percentage cut off are added, along with a histogram of the degree of the nodes in the graph at each percentage cut off.
 In addition, one file for each percentage cut off is added under the path\to\results\directory\subdir directory. These files are named path\to\results\directory\subdir\XPercentResults.txt, where X is the percentage cut off used.
 An example strucutre would be:
-	path\to\results\directory\subdir
-		Dataset0
-			20DegreeHistogram.txt
-			20LeafCull.txt
-			20PISCESCull.txt
-			Dataset0.fasta
-			Aligned.txt
+	\path\to\results\directory\subdir
+		\Dataset0
+			\20DegreeHistogram.txt
+			\20LeafCull.txt
+			\20PISCESCull.txt
+			\Dataset0.fasta
+			\Aligned.txt
 		...
-		DatasetN
-			20DegreeHistogram.txt
-			20LeafCull.txt
-			20PISCESCull.txt
-			DatasetN.fasta
-			Aligned.txt
-		20PercentResults.txt
+		\DatasetN
+			\20DegreeHistogram.txt
+			\20LeafCull.txt
+			\20PISCESCull.txt
+			\DatasetN.fasta
+			\Aligned.txt
+		\20PercentResults.txt
 path\to\results\directory\subdir\Dataset0\20DegreeHistogram.txt contains the edge histogram data for the 20% similarity cut off.
 path\to\results\directory\subdir\Dataset0\20LeafCull.txt contains the names of the proteins removed by the Leaf algorithm with a 20% similarity cut off.
 path\to\results\directory\subdir\Dataset0\20PISCESCull.txt contains the names of the proteins removed by the PISCES algorithm with a 20% similarity cut off.
@@ -163,23 +322,25 @@ If the datasets have already been generated, then skip to step 5.
 	This uses the modified Cull_for_UserSEQ.pl PISCES file. Perform this step using the command:
 		perl path\to\PISCES\bin\Cull_for_UserSEQ.pl -i path\to\FASTA\file
 	As an example, assume that the FASTA file is called Human.fasta, and that the file is located at C:\Fasta\Human.fasta.
-	Then the path\to\FASTA\file used would be C:\Fasta\Human, the '.fasta' at the end is removed. For any FASTA file submitted you should remove the file extension, irrespecttive of the actual extension.
+	Then the path\to\FASTA\file used would be C:\Fasta\Human, the '.fasta' at the end is removed. For any FASTA file submitted you should remove the file extension, irrespective of the actual extension.
 3) Rename the pdbaa.align file created in the PISCES bin directory to Aligned.txt. Move the Aligned.txt file to a directory which is not the PISCES bin directory.
 4) Generate the subsets of the Human.fasta file.
 	The command used for this was:
 		python path\to\python\code\alignmentscreatefiles.py C:\Fasta\Human.fasta path\to\Aligned.txt 100-250-500-1000-2000-5000 50-50-50-50-50-50 path\to\results\directory
 	This will generate subsets of Human.fasta of 100, 250, 500, 1000, 2000 and 5000 sequences. For each of these dataset sizes, 50 datasets will be generated.
+	The sub-directories generated by this command will be called path\to\results\directory\Results100 for datasets of 100 proteins, path\to\results\directory\Results200 for datasets of 200 proteins and so on for the others.
 	Refer to the Directory Structure Expected section of the Protein Subset Datasets section for information on the directory structure this command generates.
 
 At this point the datasets have all been generated, and the comparisons between the algorithms can be run.
 
-5) Run the algorithm comparison on the sub-datasets generated.
+5) Run the algorithm comparison on the sub-datasets generated (ensure that the time limit is properly set within the code).
 	The command used for this was:
 		python path\to\python\code\controllersubsets.py path\to\results\directory\subdir Leaf-FIS-NeighbourCull-GLP-VSA-BlastCuller-UCLUST 1
+	This command has to be run once for every sub-directory (set of sub-datasets) you want to perform the comparison on.
 	Assuming steps 1 through 4 have been followed identically, then under the directory path\to\results\directory there should be six sub-directories.
 	The names of these sub-directories will be Results100, Results250, Results500, Results1000, Results2000 and Results5000.
 	path\to\results\directory\subdir should be one of these six sub-directories.
-	This means that the command will have to be run once with each sub-directory if you want to compare the algorithm on all six dataset sizes.
+	This means that the command will have to be run 6 times (once with each sub-directory) if you want to compare the algorithm on all six dataset sizes.
 
 
 ###########################################################
@@ -187,21 +348,42 @@ UCLUST
 ###########################################################
 Directory Structure Expected
 -----------------------------------------------------------
-say you generate 50 sub-datasets of 1000 proteins from the entire human proteome, and you run the redundancy removal for each sub-dataset at 3 different cut off percentages (let's say 10, 40 and 90)
- The directory structure would look like this
-TopLevelDir
- 10
- 40
- 90
-in each of the sub-directories you would place one file for each sub-dataset (so 50 in total for this example)
-taking 10% cutoff as an example, the files would be placed in the 10 sub-directory. For each of the 50 sub-datasets the file produced by UCLUST which contains the represetnative sequences of the clusters
- (and therefore the sequences which should be non-redudnant) should be put into the sub-directory. For example, the sequences which represent the clusters generated by running UCLUST on sub-dataset 00
-at a 10% sequence identitiy cutoff would be placed in sub-directoy 10, those generated by ruinning UCLUST on the dataset at 40% cutoff would be placed in sub-directory 40.
- The naming of the files of representative sequences does not matter. Any name is fine for the individual files.
+In order to set the directory up for running the UCLUST deficiency checking, you first need to run step 5 of the Protein Subset Dataset workflow (ensuring that UCLUCT is one of the algorithms you supply) on at least one dataset size.
+
+To set up the directory we will assume that you're using the datasets of 1000 proteins and that 50 sub-datasets were generated.
+This means you would run a command similar to:
+	python path\to\python\code\controllersubsets.py path\to\results\directory\1000ProteinSubDir UCLUST 1
+in step 5 of the Protein Subset Dataset workflow (you can do more algorithms than just UCLUST without causing any problems for this setup).
+
+We'll call the directory that we're setting up path\to\UCLUSTDir, and assume that you're only interested in sequence identities of 20% and 25% (adding more sequence identities is fine).
+The basic directory strucutre would be as follws (if you wish to add more sequence identities then just add more numbered directories (the number being the sequence identity you use)):
+	path\to\UCLUSTDir
+		\20
+		\25
+Each numbered sub-directory will contain one file for each sub-dataset you want to include in the UCLUST deficiency checking (so for 50 sub-datasets each numbered sub-directory will contain 50 files).
+The files to add can be found in the directory created in step 5 of the Protein Subset Dataset workflow.
+The files will be named path\to\results\directory\subdir\DatasetN\XXUCLUSTClustered.fasta, where XX is the percentage cut-off used.
+In order to gather the files needed for the 20% cut-off, you would go through all the dataset directories in path\to\results\directory\subdir, and copy the 20UCLUSTClustered.fasta file in each directory to path\to\UCLUSTDir\20.
+The same process is done for each seuence identity cut-off you want to run the UCLUST deficiency checking on.
+The files you have just copied contain the representative sequences for the clusters generated by UCLUST. This means that they should be the non-redenundant set of sequences generated by UCLUST.
+
+This process will almost certainly require renaming the xxUCLUSTClustered.fasta files. The names used for these files are unimportant, so they can be named anyway you see fit.
 
 Directory Structure Generated
 -----------------------------------------------------------
-After running the script the directory is not modified, and the results are put in the file you specifiy when calling the script.
+The script dows not modify the input directory structure, it simply puts the results in whichever file you tell it to when calling the script.
+The results file will contain the number of proteins with incident edges in all the datasets, the number of total proteins in all the datasets and the percentage of proteins with an incident edge.
 
 Workflow
 -----------------------------------------------------------
+This procedure will enable you to determine the percentage of 'non-redundant' proteins (as determined by UCLUST) that have an edge remaining in the graph.
+It therefore provides an estimate of the redundancy remaining in the dataset.
+
+1) Carry out step 5 of the Protein Subset Dataset workflow (ensuring that UCLUCT is one of the algorithms you supply).
+2) Setup the input directory as outlined in the UCLUST Directory Strucutre Expected section.
+3) Run the UCLUSST deficiency checking script.
+	The command for this was:
+		python path\to\python\code\UCLUSTdeficiencychecking.py path\to\Aligned.txt path\to\UCLUSTDir path\to\ResultsFile.txt
+	path\to\Aligned.txt is the file of alignments between proteins generated in step 2 of the Protein Subset Dataset workflow.
+	path\to\UCLUSTDir is the path to the directory set up in step 2 of this workflow.
+	path\to\ResultsFile.txt will be the file where the results are stored.

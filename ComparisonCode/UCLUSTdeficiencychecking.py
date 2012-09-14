@@ -11,7 +11,7 @@ def processdir(alignments, UCLUSTDir, percentage):
     @param percentage: The percentage sequence identity used to generate the non-redundant dataset.
     @type percentage : integer
     return @type: list, list
-    return @use : The number of proteins with aredudant relationship in each 'non-redundant' dataset at the percentage cutoff, the number of proteins in each 'non-redundant' dataset at the percentage cutoff.
+    return @use : The number of proteins with a redudant relationship in each 'non-redundant' dataset at the percentage cutoff, the number of proteins in each 'non-redundant' dataset at the percentage cutoff.
 
     """
     

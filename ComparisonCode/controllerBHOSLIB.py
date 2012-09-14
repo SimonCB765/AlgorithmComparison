@@ -16,7 +16,7 @@ import BHOSLIB
 
 # Import the culling methods.
 import CMBlastCuller
-import CMBSK
+import CMVSA
 import CMFIS
 import CMGLP
 import CMLeaf
@@ -157,13 +157,13 @@ def main(args):
             elif alg == 'VSA':
                 # Perform the culling and timing using VSA.
                 print '\t\tNow using algorithm VSA. ', time.clock()
-                removedBSK, proteinsToKeep, removeNode, nodesToKeep, BSKTimed = CMBSK.main(adjList, range(1, numOfNodes + 1), timeAllowed)
-                BSKOutput = open(resultsDir + '\\' + bench + '-VSA.txt', 'w')
-                for i in removedBSK:
-                    BSKOutput.write(str(int(i) + 1) + '\n')
-                BSKOutput.close()
+                removedVSA, proteinsToKeep, removeNode, nodesToKeep, VSATimed = CMVSA.main(adjList, range(1, numOfNodes + 1), timeAllowed)
+                VSAOutput = open(resultsDir + '\\' + bench + '-VSA.txt', 'w')
+                for i in removedVSA:
+                    VSAOutput.write(str(int(i) + 1) + '\n')
+                VSAOutput.close()
                 numRemoved = numOfNodes - len(nodesToKeep)
-                resultsTabDelim.write('\t' + str(BSKTimed) + '\t' + str(len(nodesToKeep)) + '\t' + str(MISNum - len(nodesToKeep)))
+                resultsTabDelim.write('\t' + str(VSATimed) + '\t' + str(len(nodesToKeep)) + '\t' + str(MISNum - len(nodesToKeep)))
 
                 print '\t\tFinished algorithm VSA. ', time.clock()
 

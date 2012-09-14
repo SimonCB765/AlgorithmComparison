@@ -275,14 +275,14 @@ if __name__ == '__main__':
 
     # Determine the locations of the PISCES files needed.
     BLASTDBFolder = sys.argv[1]
-    duplicates = BLASTDBFolder + '\MakeNonRedundant.log.pdb'
+    duplicates = BLASTDBFolder + '\\MakeNonRedundant.log.pdb'
     resolutionData = BLASTDBFolder + '\\resolution.dat'
     fastaSequences = BLASTDBFolder + '\\pdbaa'
     alignmentFile = BLASTDBFolder + '\\pdbaa.align'
 
     
     culledListFolder = sys.argv[2]  # Expects this input to be a folder that contains all the gzipped culled PISCES lists.
-    resultsFile = culledListFolder + '\Results.txt'
+    resultsFile = culledListFolder + '\\Results.txt'
 
     # Determine whether any files have already been run, enables you to continue from where you left off.
     alreadyDone = []

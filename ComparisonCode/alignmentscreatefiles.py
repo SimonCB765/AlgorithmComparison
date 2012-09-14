@@ -25,7 +25,7 @@ def main(inFASTA, alignedFile, length, toGenerate, resultsDir, makeInput=False, 
     @type length : list of integers
     @param toGenerate: The number of datasets of each size to generate.
     @type toGenerate : list of integers
-    @param resultsDir: The directory where the generated datasets and their alignment files should be stored.
+    @param resultsDir: The directory where the directories containing the generated datasets and their alignment files should be stored.
     @type resultsDir : string (file location)
 
     """
@@ -78,6 +78,7 @@ def main(inFASTA, alignedFile, length, toGenerate, resultsDir, makeInput=False, 
     for i in range(len(length)):
         toGen = toGenerate[i]
         lengthOfFastaFile = length[i]
+        resultsSubDir = resultsDir + '\\Results' + str(lengthOfFastaFile)
         print 'Generating the datasets with ', lengthOfFastaFile, ' sequences.'
 
         for j in range(toGen):
@@ -90,7 +91,7 @@ def main(inFASTA, alignedFile, length, toGenerate, resultsDir, makeInput=False, 
                 numberToGen = str(j)
 
             # Create the directory that will hold the current dataset being generated.
-            outputFolder = resultsDir + '\\' + str(lengthOfFastaFile) + '-' + numberToGen
+            outputFolder = resultsSubDir + '\\' + str(lengthOfFastaFile) + '-' + numberToGen
             if os.path.isdir(outputFolder):
                 confirm = raw_input(outputFolder + ' exists on the system. If you continue it will be deleted and recreated. Press \'y\' or \'Y\' without the \'\' to continue: ')
                 if confirm.upper() == 'Y':

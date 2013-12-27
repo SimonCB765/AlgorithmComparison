@@ -40,7 +40,7 @@ def compare_exact_and_others(exactResults, otherAlgorithmsResults, outputLocatio
             datasetSize = dataset.split('-')[0]
             line = (dataset + '\t' + str(exactResults[cutoff][dataset]['maxIndep']) + '\t' +
                     str(exactResults[cutoff][dataset]['time']))
-            for i in otherAlgsUsed:
+            for i in ['NeighbourCull', 'FIS', 'Leaf', 'VSA', 'BlastCuller', 'GLP', 'PISCES']:
                 otherAlgResults = otherAlgorithmsResults[i]
                 if otherAlgResults[cutoff][dataset]['maxIndep'] == '*':
                     # If the other algorithm didn't finish in time at the dataset size/cut off combination, then record this in the
@@ -85,6 +85,7 @@ def process(folderWithMyResults):
     resultsNeighbourCull = dict([(i, {}) for i in ['10', '20', '30', '40', '50', '60', '70', '80', '90']])
     resultsVSA = dict([(i, {}) for i in ['10', '20', '30', '40', '50', '60', '70', '80', '90']])
     resultsBlastCuller = dict([(i, {}) for i in ['10', '20', '30', '40', '50', '60', '70', '80', '90']])
+    resultsGLP = dict([(i, {}) for i in ['10', '20','25','30','40','50','60','70','80','90']])
     for i in ['Results100', 'Results250', 'Results500', 'Results1000', 'Results2000', 'Results5000']:
         datasetSize = int(i[7:])
         currentDir = folderWithMyResults + '\\' + i
@@ -110,6 +111,8 @@ def process(folderWithMyResults):
                     neighbourCullKept = chunks[14]
                 else:
                     neighbourCullKept = datasetSize - int(chunks[14])
+                GLPTime = float(chunks[15])
+                GLPKept = datasetSize - int(chunks[16])
                 VSATime = float(chunks[17])
                 VSAKept = datasetSize - int(chunks[18])
                 blastCullerTime = float(chunks[19])
@@ -132,9 +135,12 @@ def process(folderWithMyResults):
                 resultsBlastCuller[cutoff][dataset] = {}
                 resultsBlastCuller[cutoff][dataset]['maxIndep'] = blastCullerKept
                 resultsBlastCuller[cutoff][dataset]['time'] = blastCullerTime
+                resultsGLP[cutoff][dataset] = {}
+                resultsGLP[cutoff][dataset]['maxIndep'] = GLPKept
+                resultsGLP[cutoff][dataset]['time'] = GLPTime
             readResults.close()
 
-    return resultsPISCES, resultsLeaf, resultsFIS, resultsNeighbourCull, resultsVSA, resultsBlastCuller
+    return resultsPISCES, resultsLeaf, resultsFIS, resultsNeighbourCull, resultsVSA, resultsBlastCuller, resultsGLP
 
 def processcsv(fileToCompare):
     """Processes a CSV file that contains the results of culling datasets.
@@ -169,9 +175,8 @@ def processcsv(fileToCompare):
     return results
 
 if __name__ == '__main__':
-    resultsPISCES, resultsLeaf, resultsFIS, resultsNeighbourCull, resultsVSA, resultsBlastCuller = process('G:\PhD-Snapshots\RedundancyRemovalResults\ResultsForExactComparison')
+    resultsPISCES, resultsLeaf, resultsFIS, resultsNeighbourCull, resultsVSA, resultsBlastCuller, resultsGLP = process('G:\PhD-Snapshots\RedundancyRemovalResults\ResultsForExactComparison')
     resultsExact = processcsv('G:\PhD-Snapshots\RedundancyRemovalResults\ResultsForExactComparison\ExactMisData\\xmips.csv')
-    resultsGLP = processcsv('G:\PhD-Snapshots\RedundancyRemovalResults\ResultsForExactComparison\ExactMisData\\mips.csv')
 
     compare_exact_and_others(resultsExact,
                              {'PISCES' : resultsPISCES, 'Leaf' : resultsLeaf, 'FIS' : resultsFIS, 'NeighbourCull' : resultsNeighbourCull,
